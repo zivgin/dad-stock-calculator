@@ -31,8 +31,9 @@ export async function GET(
     });
   } catch (error) {
     console.error(`Error fetching ${ticker}:`, error);
-    const message =
-      error instanceof Error ? error.message : "Failed to fetch stock data";
-    return Response.json({ error: message }, { status: 500 });
+    return Response.json(
+      { error: `Failed to fetch data for ${ticker.toUpperCase()}` },
+      { status: 500 }
+    );
   }
 }

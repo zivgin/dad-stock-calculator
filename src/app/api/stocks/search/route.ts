@@ -7,6 +7,9 @@ export async function GET(request: NextRequest) {
   if (!query || query.length < 1) {
     return Response.json([]);
   }
+  if (query.length > 100) {
+    return Response.json({ error: "Query too long" }, { status: 400 });
+  }
 
   try {
     if (isDemoMode()) {
