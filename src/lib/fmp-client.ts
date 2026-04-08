@@ -43,6 +43,8 @@ interface FMPProfile {
   price: number;
   marketCap: number;
   range: string; // "169.21-288.62"
+  sector: string;
+  industry: string;
 }
 
 interface FMPRatiosTTM {
@@ -86,37 +88,31 @@ export async function searchCompanies(
     exchangeShortName: r.exchange || "NASDAQ",
   });
 
-  // Search by name
-  const nameResults = await fmpFetch<FMPSearchResult[]>("/search-name", {
-    query: query,
-  });
+  // Fire name search and optional ticker profile lookup in parallel
+  const looksLikeTicker = /^[A-Za-z]{1,5}$/.test(query.trim());
+  const upperQuery = query.trim().toUpperCase();
+
+  const [nameResults, profileResults] = await Promise.all([
+    fmpFetch<FMPSearchResult[]>("/search-name", { query }),
+    looksLikeTicker
+      ? fmpFetch<FMPProfile[]>("/profile", { symbol: upperQuery }).catch(() => [] as FMPProfile[])
+      : Promise.resolve([] as FMPProfile[]),
+  ]);
+
   const filtered = nameResults.filter(isUSExchange).slice(0, 8).map(toResult);
 
-  // If query looks like a ticker (1-5 alpha chars), also try a direct profile lookup
-  // to catch exact ticker matches that search-name misses
-  const looksLikeTicker = /^[A-Za-z]{1,5}$/.test(query.trim());
-  if (looksLikeTicker) {
-    const upperQuery = query.trim().toUpperCase();
+  // Prepend exact ticker match if search-name missed it
+  if (profileResults.length > 0) {
     const alreadyIncluded = filtered.some((r) => r.symbol === upperQuery);
     if (!alreadyIncluded) {
-      try {
-        const profiles = await fmpFetch<FMPProfile[]>("/profile", {
-          symbol: upperQuery,
-        });
-        if (profiles.length > 0) {
-          const p = profiles[0];
-          filtered.unshift({
-            symbol: p.symbol,
-            name: p.companyName,
-            currency: "USD",
-            exchangeShortName: "NASDAQ",
-          });
-          // Keep max 8
-          if (filtered.length > 8) filtered.pop();
-        }
-      } catch {
-        // Profile lookup failed — just use name results
-      }
+      const p = profileResults[0];
+      filtered.unshift({
+        symbol: p.symbol,
+        name: p.companyName,
+        currency: "USD",
+        exchangeShortName: "NASDAQ",
+      });
+      if (filtered.length > 8) filtered.pop();
     }
   }
 
@@ -187,6 +183,8 @@ export async function getFullStockData(ticker: string): Promise<StockData> {
   return {
     ticker: upperTicker,
     name: profile.companyName,
+    sector: profile.sector || "",
+    industry: profile.industry || "",
     price: profile.price,
     marketCap: profile.marketCap,
     week52High,

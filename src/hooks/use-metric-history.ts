@@ -1,41 +1,33 @@
 "use client";
 
-import { fetchHistoricalRatios, fetchStockProfile } from "@/lib/api-client";
-import { HistoricalRatio, StockProfile } from "@/lib/types";
+import { fetchHistoricalRatios } from "@/lib/api-client";
+import { HistoricalRatio } from "@/lib/types";
 import useSWR from "swr";
 
-interface MetricHistoryData {
-  ratios: Record<string, HistoricalRatio[]>;
-  profiles: Record<string, StockProfile>;
-}
-
-export function useMetricHistory(tickers: string[]) {
-  const { data, isLoading } = useSWR<MetricHistoryData>(
-    tickers.length > 0 ? `metric-history-${tickers.sort().join(",")}` : null,
+/**
+ * Fetches 5-year historical ratios for selected tickers.
+ * Only fetches when enabled (i.e., when a metric row is expanded).
+ */
+export function useMetricHistory(tickers: string[], enabled: boolean) {
+  const { data, isLoading } = useSWR<Record<string, HistoricalRatio[]>>(
+    enabled && tickers.length > 0
+      ? `metric-history-${[...tickers].sort().join(",")}`
+      : null,
     async () => {
-      const [ratioResults, profileResults] = await Promise.all([
-        Promise.allSettled(tickers.map((t) => fetchHistoricalRatios(t))),
-        Promise.allSettled(tickers.map((t) => fetchStockProfile(t))),
-      ]);
-
+      const results = await Promise.allSettled(
+        tickers.map((t) => fetchHistoricalRatios(t))
+      );
       const ratios: Record<string, HistoricalRatio[]> = {};
-      ratioResults.forEach((r, i) => {
+      results.forEach((r, i) => {
         if (r.status === "fulfilled") ratios[tickers[i]] = r.value;
       });
-
-      const profiles: Record<string, StockProfile> = {};
-      profileResults.forEach((r, i) => {
-        if (r.status === "fulfilled") profiles[tickers[i]] = r.value;
-      });
-
-      return { ratios, profiles };
+      return ratios;
     },
     { revalidateOnFocus: false, dedupingInterval: 60000 }
   );
 
   return {
-    ratios: data?.ratios || {},
-    profiles: data?.profiles || {},
+    ratios: data || {},
     isLoading,
   };
 }

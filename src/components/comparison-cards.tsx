@@ -1,7 +1,7 @@
 "use client";
 
 import { METRICS } from "@/lib/constants";
-import { HistoricalRatio, ScoredStock, MetricColor, StockProfile } from "@/lib/types";
+import { HistoricalRatio, ScoredStock, StockProfile } from "@/lib/types";
 import { MetricCell } from "./metric-cell";
 import { ScoreBadge } from "./score-badge";
 import { MetricDetail } from "./metric-detail";
@@ -14,15 +14,17 @@ interface ComparisonCardsProps {
   stocks: ScoredStock[];
   historicalRatios?: Record<string, HistoricalRatio[]>;
   profiles?: Record<string, StockProfile>;
+  onMetricExpand?: () => void;
 }
 
-export function ComparisonCards({ stocks, historicalRatios, profiles }: ComparisonCardsProps) {
+export function ComparisonCards({ stocks, historicalRatios, profiles, onMetricExpand }: ComparisonCardsProps) {
   const [expandedMetric, setExpandedMetric] = useState<string | null>(null);
 
   if (stocks.length === 0) return null;
 
   const toggleMetric = (key: string) => {
     setExpandedMetric((prev) => (prev === key ? null : key));
+    onMetricExpand?.();
   };
 
   return (

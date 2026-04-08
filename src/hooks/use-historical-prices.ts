@@ -19,7 +19,7 @@ export function useHistoricalPrices(tickers: string[], range: TimeRange) {
   const fromDate = getFromDate(range);
 
   const { data, isLoading, error } = useSWR<Record<string, PricePoint[]>>(
-    tickers.length > 0 ? `history-${tickers.sort().join(",")}-${range}` : null,
+    tickers.length > 0 ? `history-${[...tickers].sort().join(",")}-${range}` : null,
     async () => {
       const results = await Promise.allSettled(
         tickers.map((t) => fetchHistoricalPrices(t, fromDate))

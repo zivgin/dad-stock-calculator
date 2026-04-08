@@ -1,8 +1,7 @@
 "use client";
 
-import { METRIC_CATEGORIES } from "@/lib/constants";
+import { CHART_COLORS, METRIC_CATEGORIES } from "@/lib/constants";
 import { ScoredStock } from "@/lib/types";
-import { cn } from "@/lib/utils";
 import {
   Radar,
   RadarChart,
@@ -13,22 +12,14 @@ import {
   Legend,
   Tooltip,
 } from "recharts";
-import { useState, useEffect } from "react";
-
-const COLORS = ["#3b82f6", "#8b5cf6", "#f59e0b", "#10b981", "#f43f5e"];
+import { useIsMobile } from "@/hooks/use-is-mobile";
 
 interface StockRadarChartProps {
   stocks: ScoredStock[];
 }
 
 export function StockRadarChart({ stocks }: StockRadarChartProps) {
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    setIsMobile(window.innerWidth < 768);
-    const handler = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener("resize", handler);
-    return () => window.removeEventListener("resize", handler);
-  }, []);
+  const isMobile = useIsMobile();
 
   if (stocks.length === 0) return null;
 
@@ -79,8 +70,8 @@ export function StockRadarChart({ stocks }: StockRadarChartProps) {
                 key={stock.ticker}
                 name={stock.ticker}
                 dataKey={stock.ticker}
-                stroke={COLORS[i % COLORS.length]}
-                fill={COLORS[i % COLORS.length]}
+                stroke={CHART_COLORS[i % CHART_COLORS.length]}
+                fill={CHART_COLORS[i % CHART_COLORS.length]}
                 fillOpacity={stocks.length === 1 ? 0.25 : 0.1}
                 strokeWidth={2}
               />

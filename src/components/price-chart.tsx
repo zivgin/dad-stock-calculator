@@ -1,9 +1,10 @@
 "use client";
 
-import { PricePoint, TimeRange } from "@/lib/types";
-import { CHIP_COLORS } from "@/lib/constants";
+import { TimeRange } from "@/lib/types";
+import { CHART_COLORS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useHistoricalPrices } from "@/hooks/use-historical-prices";
 import {
   LineChart,
@@ -17,9 +18,6 @@ import {
 import { format, parseISO } from "date-fns";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-
-// Chart line colors (saturated versions of chip colors)
-const LINE_COLORS = ["#3b82f6", "#8b5cf6", "#f59e0b", "#10b981", "#f43f5e"];
 
 const TIME_RANGES: { label: string; value: TimeRange }[] = [
   { label: "1M", value: "1M" },
@@ -53,14 +51,20 @@ export function PriceChart({ tickers }: PriceChartProps) {
       if (points.length > 0) firstPrices[ticker] = points[0].close;
     }
 
+    // Pre-index prices by date for O(1) lookup instead of O(n) find()
+    const indexedByDate: Record<string, Map<string, number>> = {};
+    for (const [ticker, points] of Object.entries(priceHistory)) {
+      indexedByDate[ticker] = new Map(points.map((p) => [p.date, p.close]));
+    }
+
     // Build chart data: each row = { date, AAPL: %change, MSFT: %change, ... }
     const data = sortedDates.map((date) => {
       const row: Record<string, string | number> = { date };
-      for (const [ticker, points] of Object.entries(priceHistory)) {
-        const point = points.find((p) => p.date === date);
-        if (point && firstPrices[ticker]) {
+      for (const [ticker] of Object.entries(priceHistory)) {
+        const close = indexedByDate[ticker]?.get(date);
+        if (close !== undefined && firstPrices[ticker]) {
           row[ticker] = parseFloat(
-            (((point.close - firstPrices[ticker]) / firstPrices[ticker]) * 100).toFixed(2)
+            (((close - firstPrices[ticker]) / firstPrices[ticker]) * 100).toFixed(2)
           );
         }
       }
@@ -84,13 +88,7 @@ export function PriceChart({ tickers }: PriceChartProps) {
     return { chartData: data, trendInfo: trends };
   }, [priceHistory]);
 
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    setIsMobile(window.innerWidth < 768);
-    const handler = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener("resize", handler);
-    return () => window.removeEventListener("resize", handler);
-  }, []);
+  const isMobile = useIsMobile();
 
   if (tickers.length === 0) return null;
 
@@ -143,7 +141,7 @@ export function PriceChart({ tickers }: PriceChartProps) {
               >
                 <span
                   className="w-2 h-2 rounded-full"
-                  style={{ backgroundColor: LINE_COLORS[i % LINE_COLORS.length] }}
+                  style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] }}
                 />
                 <span className="font-medium text-zinc-700">{ticker}</span>
                 <span
@@ -243,7 +241,7 @@ export function PriceChart({ tickers }: PriceChartProps) {
                   key={ticker}
                   type="monotone"
                   dataKey={ticker}
-                  stroke={LINE_COLORS[i % LINE_COLORS.length]}
+                  stroke={CHART_COLORS[i % CHART_COLORS.length]}
                   strokeWidth={2}
                   dot={false}
                   connectNulls

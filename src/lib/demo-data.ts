@@ -10,6 +10,8 @@ export const DEMO_STOCKS: Record<string, StockData> = {
   AAPL: {
     ticker: "AAPL",
     name: "Apple Inc.",
+    sector: "Technology",
+    industry: "Consumer Electronics",
     price: 228.5,
     marketCap: 3_480_000_000_000,
     week52High: 260.1,
@@ -28,6 +30,8 @@ export const DEMO_STOCKS: Record<string, StockData> = {
   MSFT: {
     ticker: "MSFT",
     name: "Microsoft Corporation",
+    sector: "Technology",
+    industry: "Software - Infrastructure",
     price: 454.3,
     marketCap: 3_380_000_000_000,
     week52High: 468.3,
@@ -46,6 +50,8 @@ export const DEMO_STOCKS: Record<string, StockData> = {
   GOOGL: {
     ticker: "GOOGL",
     name: "Alphabet Inc.",
+    sector: "Communication Services",
+    industry: "Internet Content & Information",
     price: 192.8,
     marketCap: 2_370_000_000_000,
     week52High: 208.7,
@@ -64,6 +70,8 @@ export const DEMO_STOCKS: Record<string, StockData> = {
   NVDA: {
     ticker: "NVDA",
     name: "NVIDIA Corporation",
+    sector: "Technology",
+    industry: "Semiconductors",
     price: 136.4,
     marketCap: 3_340_000_000_000,
     week52High: 153.1,
@@ -82,6 +90,8 @@ export const DEMO_STOCKS: Record<string, StockData> = {
   AMZN: {
     ticker: "AMZN",
     name: "Amazon.com Inc.",
+    sector: "Consumer Cyclical",
+    industry: "Internet Retail",
     price: 205.7,
     marketCap: 2_180_000_000_000,
     week52High: 242.5,
@@ -100,6 +110,8 @@ export const DEMO_STOCKS: Record<string, StockData> = {
   META: {
     ticker: "META",
     name: "Meta Platforms Inc.",
+    sector: "Communication Services",
+    industry: "Internet Content & Information",
     price: 610.2,
     marketCap: 1_540_000_000_000,
     week52High: 740.9,
@@ -118,6 +130,8 @@ export const DEMO_STOCKS: Record<string, StockData> = {
   TSLA: {
     ticker: "TSLA",
     name: "Tesla Inc.",
+    sector: "Consumer Cyclical",
+    industry: "Auto Manufacturers",
     price: 276.3,
     marketCap: 886_000_000_000,
     week52High: 488.5,
@@ -136,6 +150,8 @@ export const DEMO_STOCKS: Record<string, StockData> = {
   JPM: {
     ticker: "JPM",
     name: "JPMorgan Chase & Co.",
+    sector: "Financial Services",
+    industry: "Banks - Diversified",
     price: 268.5,
     marketCap: 760_000_000_000,
     week52High: 281.4,
@@ -154,6 +170,8 @@ export const DEMO_STOCKS: Record<string, StockData> = {
   V: {
     ticker: "V",
     name: "Visa Inc.",
+    sector: "Financial Services",
+    industry: "Credit Services",
     price: 348.2,
     marketCap: 680_000_000_000,
     week52High: 366.5,
@@ -172,6 +190,8 @@ export const DEMO_STOCKS: Record<string, StockData> = {
   WMT: {
     ticker: "WMT",
     name: "Walmart Inc.",
+    sector: "Consumer Defensive",
+    industry: "Discount Stores",
     price: 96.8,
     marketCap: 778_000_000_000,
     week52High: 105.3,
@@ -190,6 +210,8 @@ export const DEMO_STOCKS: Record<string, StockData> = {
   JNJ: {
     ticker: "JNJ",
     name: "Johnson & Johnson",
+    sector: "Healthcare",
+    industry: "Drug Manufacturers - General",
     price: 158.9,
     marketCap: 382_000_000_000,
     week52High: 167.7,
@@ -208,6 +230,8 @@ export const DEMO_STOCKS: Record<string, StockData> = {
   UNH: {
     ticker: "UNH",
     name: "UnitedHealth Group Inc.",
+    sector: "Healthcare",
+    industry: "Healthcare Plans",
     price: 490.2,
     marketCap: 448_000_000_000,
     week52High: 630.7,

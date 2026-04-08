@@ -23,7 +23,17 @@ export default function Home() {
 
   const tickers = useMemo(() => selected.map((s) => s.ticker), [selected]);
   const { stocks, isLoading, error } = useStockData(tickers);
-  const { ratios: historicalRatios, profiles } = useMetricHistory(tickers);
+  const [metricExpanded, setMetricExpanded] = useState(false);
+  const { ratios: historicalRatios } = useMetricHistory(tickers, metricExpanded);
+
+  // Derive profiles from stock data (sector/industry already in StockData)
+  const profiles = useMemo(() => {
+    const map: Record<string, { sector: string; industry: string }> = {};
+    for (const [ticker, data] of Object.entries(stocks)) {
+      map[ticker] = { sector: data.sector, industry: data.industry };
+    }
+    return map;
+  }, [stocks]);
 
   const scoredStocks = useMemo(() => {
     const scored = Object.values(stocks).map(scoreStock);
@@ -102,11 +112,13 @@ export default function Home() {
               stocks={scoredStocks}
               historicalRatios={historicalRatios}
               profiles={profiles}
+              onMetricExpand={() => setMetricExpanded(true)}
             />
             <ComparisonCards
               stocks={scoredStocks}
               historicalRatios={historicalRatios}
               profiles={profiles}
+              onMetricExpand={() => setMetricExpanded(true)}
             />
 
             {/* Ranking */}

@@ -15,8 +15,8 @@ export function useStockData(tickers: string[]) {
   const cacheRef = useRef<Record<string, StockData>>({});
 
   // SWR for batch fetching — only fetches tickers not yet in cache
-  const { data, error, isLoading, mutate } = useSWR<Record<string, StockData>>(
-    tickers.length > 0 ? `stocks-${tickers.sort().join(",")}` : null,
+  const { data, error, isLoading } = useSWR<Record<string, StockData>>(
+    tickers.length > 0 ? `stocks-${[...tickers].sort().join(",")}` : null,
     async () => {
       const uncached = tickers.filter((t) => !cacheRef.current[t]);
       const cached = tickers.filter((t) => cacheRef.current[t]);

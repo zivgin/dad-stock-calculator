@@ -18,15 +18,17 @@ interface ComparisonTableProps {
   stocks: ScoredStock[];
   historicalRatios?: Record<string, HistoricalRatio[]>;
   profiles?: Record<string, StockProfile>;
+  onMetricExpand?: () => void;
 }
 
-export function ComparisonTable({ stocks, historicalRatios, profiles }: ComparisonTableProps) {
+export function ComparisonTable({ stocks, historicalRatios, profiles, onMetricExpand }: ComparisonTableProps) {
   const [expandedMetric, setExpandedMetric] = useState<string | null>(null);
 
   if (stocks.length === 0) return null;
 
   const toggleMetric = (key: string) => {
     setExpandedMetric((prev) => (prev === key ? null : key));
+    onMetricExpand?.();
   };
 
   return (

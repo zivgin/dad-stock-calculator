@@ -3,8 +3,8 @@
  * Calls FMP directly from the browser (free plan blocks cloud IPs).
  */
 
-import { HistoricalRatio, PricePoint, StockData, StockProfile, StockSearchResult } from "./types";
-import { searchCompanies, getFullStockData, getHistoricalPrices, getHistoricalRatios, getStockProfile } from "./fmp-client";
+import { HistoricalRatio, PricePoint, StockData, StockSearchResult } from "./types";
+import { searchCompanies, getFullStockData, getHistoricalPrices, getHistoricalRatios } from "./fmp-client";
 import { demoSearch, demoGetStock, isDemoMode } from "./demo-data";
 
 export async function fetchSearchResults(
@@ -36,11 +36,4 @@ export async function fetchHistoricalRatios(
 ): Promise<HistoricalRatio[]> {
   if (isDemoMode()) return [];
   return getHistoricalRatios(ticker);
-}
-
-export async function fetchStockProfile(
-  ticker: string
-): Promise<StockProfile> {
-  if (isDemoMode()) return { sector: "", industry: "" };
-  return getStockProfile(ticker);
 }

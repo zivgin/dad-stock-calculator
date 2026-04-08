@@ -1,6 +1,7 @@
 "use client";
 
 import { MetricDefinition, ScoredStock, MetricColor, HistoricalRatio, StockProfile } from "@/lib/types";
+import { CHART_COLORS } from "@/lib/constants";
 import { getIndustryAverage, METRIC_TO_INDUSTRY_KEY } from "@/lib/industry-averages";
 import { formatMetricValue, cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -24,9 +25,6 @@ const COLOR_MAP: Record<MetricColor, string> = {
   orange: "#f59e0b",
   red: "#ef4444",
 };
-
-const LINE_COLORS = ["#3b82f6", "#8b5cf6", "#f59e0b", "#10b981", "#f43f5e"];
-const AREA_FILLS = ["#3b82f620", "#8b5cf620", "#f59e0b20", "#10b98120", "#f43f5e20"];
 
 // Map metric keys to HistoricalRatio fields
 const METRIC_TO_HISTORY_KEY: Record<string, keyof HistoricalRatio> = {
@@ -204,8 +202,8 @@ export function MetricDetail({
                           id={`grad-${metric.key}-${stock.ticker}`}
                           x1="0" y1="0" x2="0" y2="1"
                         >
-                          <stop offset="0%" stopColor={LINE_COLORS[i % LINE_COLORS.length]} stopOpacity={0.15} />
-                          <stop offset="100%" stopColor={LINE_COLORS[i % LINE_COLORS.length]} stopOpacity={0} />
+                          <stop offset="0%" stopColor={CHART_COLORS[i % CHART_COLORS.length]} stopOpacity={0.15} />
+                          <stop offset="100%" stopColor={CHART_COLORS[i % CHART_COLORS.length]} stopOpacity={0} />
                         </linearGradient>
                       ))}
                     </defs>
@@ -277,10 +275,10 @@ export function MetricDetail({
                         key={stock.ticker}
                         type="monotone"
                         dataKey={stock.ticker}
-                        stroke={LINE_COLORS[i % LINE_COLORS.length]}
+                        stroke={CHART_COLORS[i % CHART_COLORS.length]}
                         fill={`url(#grad-${metric.key}-${stock.ticker})`}
                         strokeWidth={2.5}
-                        dot={{ r: 4, fill: "#fff", stroke: LINE_COLORS[i % LINE_COLORS.length], strokeWidth: 2 }}
+                        dot={{ r: 4, fill: "#fff", stroke: CHART_COLORS[i % CHART_COLORS.length], strokeWidth: 2 }}
                         connectNulls
                       />
                     ))}

@@ -154,23 +154,6 @@ export const METRIC_CATEGORIES: {
   { label: "Cash Flow", keys: ["fcfYield", "freeCashFlow"] },
 ];
 
-// Chart type per metric for the expandable row visualization
-export type MetricChartType = "bar" | "gauge";
-export const METRIC_CHART_TYPES: Record<string, MetricChartType> = {
-  peRatio: "bar",
-  pegRatio: "bar",
-  priceToCashFlow: "bar",
-  revenueGrowth3Y: "bar",
-  epsGrowth3Y: "bar",
-  operatingMargin: "bar",
-  netMargin: "bar",
-  debtToEquity: "bar",
-  fcfYield: "bar",
-  freeCashFlow: "bar",
-  priceToWeek52High: "gauge",
-  marketCap: "bar",
-};
-
 export const MAX_SELECTIONS = 5;
 
 export const QUICK_PICKS = [
@@ -181,6 +164,9 @@ export const QUICK_PICKS = [
   { ticker: "AMZN", name: "Amazon" },
   { ticker: "META", name: "Meta" },
 ];
+
+// Chart line colors (shared across all chart components)
+export const CHART_COLORS = ["#3b82f6", "#8b5cf6", "#f59e0b", "#10b981", "#f43f5e"];
 
 // Color palette for selected stock chips
 export const CHIP_COLORS = [

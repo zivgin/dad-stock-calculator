@@ -8,6 +8,8 @@ export interface StockSearchResult {
 export interface StockData {
   ticker: string;
   name: string;
+  sector: string;
+  industry: string;
   price: number;
   marketCap: number;
   week52High: number;
