@@ -4,7 +4,7 @@
  * Swap this file to change data providers.
  */
 
-import { StockData, StockSearchResult } from "./types";
+import { PricePoint, StockData, StockSearchResult } from "./types";
 
 const BASE_URL = "https://financialmodelingprep.com/stable";
 
@@ -210,6 +210,27 @@ export async function getFullStockData(ticker: string): Promise<StockData> {
     freeCashFlow,
     fcfYield: sanitizeNumber(fcfYield),
   };
+}
+
+// --- Historical prices ---
+
+interface FMPHistoricalPrice {
+  date: string;
+  close: number;
+}
+
+export async function getHistoricalPrices(
+  ticker: string,
+  fromDate: string
+): Promise<PricePoint[]> {
+  const data = await fmpFetch<FMPHistoricalPrice[]>(
+    "/historical-price-eod/full",
+    { symbol: ticker.toUpperCase(), from: fromDate }
+  );
+  // FMP returns newest-first, we want oldest-first for charts
+  return data
+    .map((d) => ({ date: d.date, close: d.close }))
+    .reverse();
 }
 
 /** Converts weird API values (Infinity, -Infinity, NaN) to null */

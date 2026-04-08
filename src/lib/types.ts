@@ -24,6 +24,13 @@ export interface StockData {
   fcfYield: number | null;
 }
 
+export interface PricePoint {
+  date: string;
+  close: number;
+}
+
+export type TimeRange = "1M" | "3M" | "1Y" | "3Y";
+
 export type MetricFormat = "currency" | "percent" | "ratio" | "number" | "largeCurrency";
 
 export interface MetricDefinition {

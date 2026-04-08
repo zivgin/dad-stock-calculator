@@ -5,6 +5,7 @@ import { StockSearch } from "@/components/stock-search";
 import { SelectedChips } from "@/components/selected-chips";
 import { ComparisonTable } from "@/components/comparison-table";
 import { ComparisonCards } from "@/components/comparison-cards";
+import { PriceChart } from "@/components/price-chart";
 import { RankingSection } from "@/components/ranking-section";
 import { EmptyState } from "@/components/empty-state";
 import { LoadingSkeleton } from "@/components/loading-skeleton";
@@ -84,6 +85,9 @@ export default function Home() {
                 Updating data...
               </div>
             )}
+
+            {/* Price chart */}
+            <PriceChart tickers={tickers} />
 
             {/* Comparison views */}
             <ComparisonTable stocks={scoredStocks} />
