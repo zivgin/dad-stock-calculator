@@ -1,12 +1,12 @@
 /**
  * Server-side Financial Modeling Prep API client.
- * All functions here run only in API route handlers.
+ * Uses the /stable/ endpoints (new API as of 2025).
  * Swap this file to change data providers.
  */
 
 import { StockData, StockSearchResult } from "./types";
 
-const BASE_URL = "https://financialmodelingprep.com/api/v3";
+const BASE_URL = "https://financialmodelingprep.com/stable";
 
 function apiKey(): string {
   const key = process.env.FMP_API_KEY;
@@ -14,9 +14,9 @@ function apiKey(): string {
   return key;
 }
 
-async function fmpFetch<T>(path: string): Promise<T> {
-  const separator = path.includes("?") ? "&" : "?";
-  const url = `${BASE_URL}${path}${separator}apikey=${apiKey()}`;
+async function fmpFetch<T>(path: string, params: Record<string, string> = {}): Promise<T> {
+  const searchParams = new URLSearchParams({ ...params, apikey: apiKey() });
+  const url = `${BASE_URL}${path}?${searchParams.toString()}`;
   const res = await fetch(url, { next: { revalidate: 300 } });
   if (!res.ok) {
     throw new Error(`FMP API error: ${res.status} ${res.statusText}`);
@@ -30,40 +30,38 @@ interface FMPSearchResult {
   symbol: string;
   name: string;
   currency: string;
-  exchangeShortName: string;
-  stockExchange: string;
+  exchangeFullName: string;
+  exchange: string;
 }
 
 interface FMPProfile {
   symbol: string;
   companyName: string;
   price: number;
-  mktCap: number;
-  range: string; // "123.45-234.56"
-  sector: string;
-  industry: string;
+  marketCap: number;
+  range: string; // "169.21-288.62"
 }
 
 interface FMPRatiosTTM {
-  peRatioTTM: number | null;
-  pegRatioTTM: number | null;
-  priceToCashFlowRatioTTM: number | null; // was priceToOperatingCashFlowsRatioTTM
   operatingProfitMarginTTM: number | null;
   netProfitMarginTTM: number | null;
-  debtEquityRatioTTM: number | null;
-  priceToOperatingCashFlowsRatioTTM: number | null;
+  debtToEquityRatioTTM: number | null;
+  priceToOperatingCashFlowRatioTTM: number | null;
+  freeCashFlowPerShareTTM: number | null;
 }
 
 interface FMPKeyMetricsTTM {
-  freeCashFlowPerShareTTM: number | null;
-  marketCapTTM: number | null;
-  freeCashFlowYieldTTM: number | null; // may not exist
+  freeCashFlowYieldTTM: number | null;
+  earningsYieldTTM: number | null;
+  freeCashFlowToFirmTTM: number | null;
+  freeCashFlowToEquityTTM: number | null;
 }
 
 interface FMPIncomeStatement {
   date: string;
   revenue: number;
-  epsdiluted: number;
+  epsDiluted: number | null;
+  eps: number | null;
 }
 
 // --- Public functions ---
@@ -71,22 +69,24 @@ interface FMPIncomeStatement {
 export async function searchCompanies(
   query: string
 ): Promise<StockSearchResult[]> {
-  const results = await fmpFetch<FMPSearchResult[]>(
-    `/search?query=${encodeURIComponent(query)}&limit=10`
-  );
+  const results = await fmpFetch<FMPSearchResult[]>("/search-name", {
+    query: query,
+  });
   return results
     .filter(
       (r) =>
-        r.exchangeShortName === "NYSE" ||
-        r.exchangeShortName === "NASDAQ" ||
-        r.exchangeShortName === "AMEX"
+        r.exchange === "NASDAQ" ||
+        r.exchange === "NYSE" ||
+        r.exchange === "AMEX" ||
+        r.exchangeFullName?.includes("NASDAQ") ||
+        r.exchangeFullName?.includes("NYSE")
     )
     .slice(0, 8)
     .map((r) => ({
       symbol: r.symbol,
       name: r.name,
-      currency: r.currency,
-      exchangeShortName: r.exchangeShortName,
+      currency: r.currency || "USD",
+      exchangeShortName: r.exchange || "NASDAQ",
     }));
 }
 
@@ -94,16 +94,12 @@ export async function getFullStockData(ticker: string): Promise<StockData> {
   const upperTicker = ticker.toUpperCase();
 
   // Fetch all endpoints in parallel
-  const [profiles, ratiosArr, metricsArr, incomeStatements] = await Promise.all(
-    [
-      fmpFetch<FMPProfile[]>(`/profile/${upperTicker}`),
-      fmpFetch<FMPRatiosTTM[]>(`/ratios-ttm/${upperTicker}`),
-      fmpFetch<FMPKeyMetricsTTM[]>(`/key-metrics-ttm/${upperTicker}`),
-      fmpFetch<FMPIncomeStatement[]>(
-        `/income-statement/${upperTicker}?limit=4`
-      ),
-    ]
-  );
+  const [profiles, ratiosArr, metricsArr, incomeStatements] = await Promise.all([
+    fmpFetch<FMPProfile[]>("/profile", { symbol: upperTicker }),
+    fmpFetch<FMPRatiosTTM[]>("/ratios-ttm", { symbol: upperTicker }),
+    fmpFetch<FMPKeyMetricsTTM[]>("/key-metrics-ttm", { symbol: upperTicker }),
+    fmpFetch<FMPIncomeStatement[]>("/income-statement", { symbol: upperTicker, limit: "4" }),
+  ]);
 
   const profile = profiles[0];
   if (!profile) throw new Error(`No data found for ticker: ${upperTicker}`);
@@ -131,48 +127,53 @@ export async function getFullStockData(ticker: string): Promise<StockData> {
         (Math.pow(newest.revenue / oldest.revenue, 1 / 3) - 1) * 100;
     }
 
-    if (oldest.epsdiluted > 0 && newest.epsdiluted > 0) {
+    const newestEPS = newest.epsDiluted ?? newest.eps;
+    const oldestEPS = oldest.epsDiluted ?? oldest.eps;
+    if (newestEPS && oldestEPS && oldestEPS > 0 && newestEPS > 0) {
       epsGrowth3Y =
-        (Math.pow(newest.epsdiluted / oldest.epsdiluted, 1 / 3) - 1) * 100;
+        (Math.pow(newestEPS / oldestEPS, 1 / 3) - 1) * 100;
     }
   }
 
-  // FCF: use per-share * (marketCap / price) as approximation, or key metrics
-  const fcfPerShare = metrics.freeCashFlowPerShareTTM || 0;
-  const sharesApprox =
-    profile.price > 0 ? profile.mktCap / profile.price : 0;
-  const freeCashFlow = fcfPerShare * sharesApprox;
+  // Get the latest EPS for P/E calculation
+  const latestEPS = incomeStatements[0]?.epsDiluted ?? incomeStatements[0]?.eps ?? null;
 
-  const fcfYield =
-    profile.mktCap > 0 ? (freeCashFlow / profile.mktCap) * 100 : null;
+  // Compute P/E from price and EPS
+  const peRatio = latestEPS && latestEPS > 0 ? profile.price / latestEPS : null;
 
-  // Price to cash flow — try both field names
-  const priceToCashFlow =
-    ratios.priceToCashFlowRatioTTM ??
-    ratios.priceToOperatingCashFlowsRatioTTM ??
-    null;
+  // Compute PEG from P/E and EPS growth
+  const pegRatio = peRatio && epsGrowth3Y && epsGrowth3Y > 0 ? peRatio / epsGrowth3Y : null;
+
+  // FCF: use freeCashFlowToFirmTTM from key metrics, or derive from per-share
+  const freeCashFlow = metrics.freeCashFlowToFirmTTM ?? metrics.freeCashFlowToEquityTTM ?? 0;
+
+  // FCF yield from key metrics (already a decimal like 0.033)
+  const fcfYieldRaw = metrics.freeCashFlowYieldTTM;
+  const fcfYield = fcfYieldRaw !== null && fcfYieldRaw !== undefined ? fcfYieldRaw * 100 : null;
 
   return {
     ticker: upperTicker,
     name: profile.companyName,
     price: profile.price,
-    marketCap: profile.mktCap,
+    marketCap: profile.marketCap,
     week52High,
     priceToWeek52High: week52High > 0 ? (profile.price / week52High) * 100 : 0,
-    peRatio: sanitizeNumber(ratios.peRatioTTM),
-    pegRatio: sanitizeNumber(ratios.pegRatioTTM),
-    priceToCashFlow: sanitizeNumber(priceToCashFlow),
+    peRatio: sanitizeNumber(peRatio),
+    pegRatio: sanitizeNumber(pegRatio),
+    priceToCashFlow: sanitizeNumber(ratios.priceToOperatingCashFlowRatioTTM),
     revenueGrowth3Y: sanitizeNumber(revenueGrowth3Y),
     epsGrowth3Y: sanitizeNumber(epsGrowth3Y),
     operatingMargin: sanitizeNumber(
-      ratios.operatingProfitMarginTTM
+      ratios.operatingProfitMarginTTM !== null && ratios.operatingProfitMarginTTM !== undefined
         ? ratios.operatingProfitMarginTTM * 100
         : null
     ),
     netMargin: sanitizeNumber(
-      ratios.netProfitMarginTTM ? ratios.netProfitMarginTTM * 100 : null
+      ratios.netProfitMarginTTM !== null && ratios.netProfitMarginTTM !== undefined
+        ? ratios.netProfitMarginTTM * 100
+        : null
     ),
-    debtToEquity: sanitizeNumber(ratios.debtEquityRatioTTM),
+    debtToEquity: sanitizeNumber(ratios.debtToEquityRatioTTM),
     freeCashFlow,
     fcfYield: sanitizeNumber(fcfYield),
   };
