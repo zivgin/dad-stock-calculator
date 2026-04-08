@@ -2,29 +2,37 @@
 
 import { METRICS } from "@/lib/constants";
 import { ScoredStock } from "@/lib/types";
-import { formatMetricValue } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { MetricCell } from "./metric-cell";
+import { MetricDetail } from "./metric-detail";
 import { ScoreBadge } from "./score-badge";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Info } from "lucide-react";
+import { Info, ChevronDown } from "lucide-react";
+import { useState } from "react";
 
 interface ComparisonTableProps {
   stocks: ScoredStock[];
 }
 
 export function ComparisonTable({ stocks }: ComparisonTableProps) {
+  const [expandedMetric, setExpandedMetric] = useState<string | null>(null);
+
   if (stocks.length === 0) return null;
 
+  const toggleMetric = (key: string) => {
+    setExpandedMetric((prev) => (prev === key ? null : key));
+  };
+
   return (
-    <div className="hidden md:block overflow-x-auto rounded-xl border bg-white shadow-sm">
+    <div className="hidden md:block rounded-xl border bg-white shadow-sm overflow-hidden">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b bg-zinc-50/80">
-            <th className="text-left px-4 py-3 font-medium text-zinc-500 sticky left-0 bg-zinc-50/80 z-10 min-w-[160px]">
+            <th className="text-left px-4 py-3 font-medium text-zinc-500 sticky left-0 bg-zinc-50/80 z-10 min-w-[180px]">
               Metric
             </th>
             {stocks.map((stock) => (
@@ -51,7 +59,7 @@ export function ComparisonTable({ stocks }: ComparisonTableProps) {
           </tr>
         </thead>
         <tbody>
-          {/* Price row — display only */}
+          {/* Price row — display only, not expandable */}
           <tr className="border-b hover:bg-zinc-50/50 transition-colors">
             <td className="px-4 py-2.5 font-medium text-zinc-700 sticky left-0 bg-white z-10">
               Price
@@ -65,47 +73,80 @@ export function ComparisonTable({ stocks }: ComparisonTableProps) {
             ))}
           </tr>
 
-          {/* Scored metrics */}
-          {METRICS.map((metric) => (
-            <tr
-              key={metric.key}
-              className="border-b last:border-0 hover:bg-zinc-50/50 transition-colors"
-            >
-              <td className="px-4 py-2.5 sticky left-0 bg-white z-10">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-medium text-zinc-700">
-                    {metric.label}
-                  </span>
-                  <Tooltip>
-                    <TooltipTrigger className="cursor-help">
-                      <Info className="w-3.5 h-3.5 text-zinc-400" />
-                    </TooltipTrigger>
-                    <TooltipContent
-                      side="right"
-                      className="max-w-[250px] text-xs"
-                    >
-                      {metric.description}
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
-              </td>
-              {stocks.map((stock) => {
-                const value = stock[metric.key] as number | null;
-                return (
-                  <td
-                    key={stock.ticker}
-                    className="text-center px-4 py-2.5"
+          {/* Scored metrics — expandable */}
+          {METRICS.map((metric) => {
+            const isExpanded = expandedMetric === metric.key;
+            return (
+              <tr
+                key={metric.key}
+                className="border-b last:border-0"
+              >
+                <td colSpan={stocks.length + 1} className="p-0">
+                  {/* Main row */}
+                  <div
+                    className={cn(
+                      "flex items-stretch cursor-pointer transition-colors",
+                      isExpanded
+                        ? "bg-zinc-50"
+                        : "hover:bg-zinc-50/50"
+                    )}
+                    onClick={() => toggleMetric(metric.key)}
                   >
-                    <MetricCell
-                      value={value}
-                      format={metric.format}
-                      color={stock.metricColors[metric.key]}
-                    />
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
+                    {/* Metric label */}
+                    <div className="flex items-center gap-1.5 px-4 py-2.5 min-w-[180px] sticky left-0 bg-inherit z-10">
+                      <ChevronDown
+                        className={cn(
+                          "w-3.5 h-3.5 text-zinc-400 transition-transform shrink-0",
+                          isExpanded && "rotate-180"
+                        )}
+                      />
+                      <span className="font-medium text-zinc-700">
+                        {metric.label}
+                      </span>
+                      <Tooltip>
+                        <TooltipTrigger
+                          className="cursor-help"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Info className="w-3.5 h-3.5 text-zinc-400" />
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="right"
+                          className="max-w-[250px] text-xs"
+                        >
+                          {metric.description}
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+
+                    {/* Values */}
+                    {stocks.map((stock) => {
+                      const value = stock[metric.key] as number | null;
+                      return (
+                        <div
+                          key={stock.ticker}
+                          className="flex-1 flex items-center justify-center px-4 py-2.5 min-w-[130px]"
+                        >
+                          <MetricCell
+                            value={value}
+                            format={metric.format}
+                            color={stock.metricColors[metric.key]}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Expanded detail */}
+                  <MetricDetail
+                    metric={metric}
+                    stocks={stocks}
+                    isOpen={isExpanded}
+                  />
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

@@ -6,6 +6,7 @@ import { SelectedChips } from "@/components/selected-chips";
 import { ComparisonTable } from "@/components/comparison-table";
 import { ComparisonCards } from "@/components/comparison-cards";
 import { PriceChart } from "@/components/price-chart";
+import { StockRadarChart } from "@/components/radar-chart";
 import { RankingSection } from "@/components/ranking-section";
 import { EmptyState } from "@/components/empty-state";
 import { LoadingSkeleton } from "@/components/loading-skeleton";
@@ -84,6 +85,11 @@ export default function Home() {
               <div className="text-center text-sm text-zinc-400 animate-pulse">
                 Updating data...
               </div>
+            )}
+
+            {/* Radar chart — strength profile */}
+            {scoredStocks.length >= 1 && (
+              <StockRadarChart stocks={scoredStocks} />
             )}
 
             {/* Price chart */}

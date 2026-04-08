@@ -1,19 +1,27 @@
 "use client";
 
 import { METRICS } from "@/lib/constants";
-import { ScoredStock } from "@/lib/types";
+import { ScoredStock, MetricColor } from "@/lib/types";
 import { MetricCell } from "./metric-cell";
 import { ScoreBadge } from "./score-badge";
+import { MetricDetail } from "./metric-detail";
 import { motion } from "framer-motion";
-import { CHIP_COLORS } from "@/lib/constants";
-import { Trophy } from "lucide-react";
+import { Trophy, ChevronDown } from "lucide-react";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 interface ComparisonCardsProps {
   stocks: ScoredStock[];
 }
 
 export function ComparisonCards({ stocks }: ComparisonCardsProps) {
+  const [expandedMetric, setExpandedMetric] = useState<string | null>(null);
+
   if (stocks.length === 0) return null;
+
+  const toggleMetric = (key: string) => {
+    setExpandedMetric((prev) => (prev === key ? null : key));
+  };
 
   return (
     <div className="md:hidden space-y-4">
@@ -71,19 +79,41 @@ export function ComparisonCards({ stocks }: ComparisonCardsProps) {
           <div className="divide-y">
             {METRICS.map((metric) => {
               const value = stock[metric.key] as number | null;
+              const isExpanded = expandedMetric === `${stock.ticker}-${metric.key}`;
               return (
-                <div
-                  key={metric.key}
-                  className="flex items-center justify-between px-4 py-2.5"
-                >
-                  <span className="text-sm text-zinc-600">
-                    {metric.shortLabel}
-                  </span>
-                  <MetricCell
-                    value={value}
-                    format={metric.format}
-                    color={stock.metricColors[metric.key]}
-                  />
+                <div key={metric.key}>
+                  <div
+                    className={cn(
+                      "flex items-center justify-between px-4 py-2.5 cursor-pointer transition-colors",
+                      isExpanded ? "bg-zinc-50" : "active:bg-zinc-50"
+                    )}
+                    onClick={() =>
+                      toggleMetric(`${stock.ticker}-${metric.key}`)
+                    }
+                  >
+                    <span className="text-sm text-zinc-600 flex items-center gap-1">
+                      <ChevronDown
+                        className={cn(
+                          "w-3 h-3 text-zinc-400 transition-transform",
+                          isExpanded && "rotate-180"
+                        )}
+                      />
+                      {metric.shortLabel}
+                    </span>
+                    <MetricCell
+                      value={value}
+                      format={metric.format}
+                      color={stock.metricColors[metric.key]}
+                    />
+                  </div>
+                  {/* Expanded: show all stocks for this metric */}
+                  {isExpanded && (
+                    <MetricDetail
+                      metric={metric}
+                      stocks={stocks}
+                      isOpen={true}
+                    />
+                  )}
                 </div>
               );
             })}

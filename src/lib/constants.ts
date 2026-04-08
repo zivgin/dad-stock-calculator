@@ -142,6 +142,35 @@ export const METRICS: MetricDefinition[] = [
 // Display-only metrics (no scoring)
 export const DISPLAY_METRICS: (keyof import("./types").StockData)[] = ["price"];
 
+// Categories for the radar chart — each maps to metric keys
+export const METRIC_CATEGORIES: {
+  label: string;
+  keys: (keyof import("./types").StockData)[];
+}[] = [
+  { label: "Valuation", keys: ["peRatio", "pegRatio", "priceToCashFlow"] },
+  { label: "Growth", keys: ["revenueGrowth3Y", "epsGrowth3Y"] },
+  { label: "Profitability", keys: ["operatingMargin", "netMargin"] },
+  { label: "Leverage", keys: ["debtToEquity"] },
+  { label: "Cash Flow", keys: ["fcfYield", "freeCashFlow"] },
+];
+
+// Chart type per metric for the expandable row visualization
+export type MetricChartType = "bar" | "gauge";
+export const METRIC_CHART_TYPES: Record<string, MetricChartType> = {
+  peRatio: "bar",
+  pegRatio: "bar",
+  priceToCashFlow: "bar",
+  revenueGrowth3Y: "bar",
+  epsGrowth3Y: "bar",
+  operatingMargin: "bar",
+  netMargin: "bar",
+  debtToEquity: "bar",
+  fcfYield: "bar",
+  freeCashFlow: "bar",
+  priceToWeek52High: "gauge",
+  marketCap: "bar",
+};
+
 export const MAX_SELECTIONS = 5;
 
 export const QUICK_PICKS = [
