@@ -1,4 +1,5 @@
 import { searchCompanies } from "@/lib/fmp-client";
+import { demoSearch, isDemoMode } from "@/lib/demo-data";
 import { NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -8,6 +9,9 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    if (isDemoMode()) {
+      return Response.json(demoSearch(query));
+    }
     const results = await searchCompanies(query);
     return Response.json(results);
   } catch (error) {

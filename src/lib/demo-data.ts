@@ -1,0 +1,259 @@
+/**
+ * Realistic demo data for popular stocks.
+ * Used when no FMP_API_KEY is configured, so the app works out of the box.
+ * Data is approximate and for demonstration purposes only.
+ */
+
+import { StockData, StockSearchResult } from "./types";
+
+export const DEMO_STOCKS: Record<string, StockData> = {
+  AAPL: {
+    ticker: "AAPL",
+    name: "Apple Inc.",
+    price: 228.5,
+    marketCap: 3_480_000_000_000,
+    week52High: 260.1,
+    priceToWeek52High: 87.9,
+    peRatio: 33.2,
+    pegRatio: 2.1,
+    priceToCashFlow: 26.8,
+    revenueGrowth3Y: 5.2,
+    epsGrowth3Y: 9.8,
+    operatingMargin: 33.5,
+    netMargin: 26.3,
+    debtToEquity: 1.87,
+    freeCashFlow: 105_000_000_000,
+    fcfYield: 3.0,
+  },
+  MSFT: {
+    ticker: "MSFT",
+    name: "Microsoft Corporation",
+    price: 454.3,
+    marketCap: 3_380_000_000_000,
+    week52High: 468.3,
+    priceToWeek52High: 97.0,
+    peRatio: 36.5,
+    pegRatio: 2.3,
+    priceToCashFlow: 28.1,
+    revenueGrowth3Y: 14.2,
+    epsGrowth3Y: 18.5,
+    operatingMargin: 45.8,
+    netMargin: 37.1,
+    debtToEquity: 0.29,
+    freeCashFlow: 74_000_000_000,
+    fcfYield: 2.2,
+  },
+  GOOGL: {
+    ticker: "GOOGL",
+    name: "Alphabet Inc.",
+    price: 192.8,
+    marketCap: 2_370_000_000_000,
+    week52High: 208.7,
+    priceToWeek52High: 92.4,
+    peRatio: 24.1,
+    pegRatio: 1.2,
+    priceToCashFlow: 18.2,
+    revenueGrowth3Y: 12.8,
+    epsGrowth3Y: 28.4,
+    operatingMargin: 32.1,
+    netMargin: 27.5,
+    debtToEquity: 0.05,
+    freeCashFlow: 72_000_000_000,
+    fcfYield: 3.0,
+  },
+  NVDA: {
+    ticker: "NVDA",
+    name: "NVIDIA Corporation",
+    price: 136.4,
+    marketCap: 3_340_000_000_000,
+    week52High: 153.1,
+    priceToWeek52High: 89.1,
+    peRatio: 55.2,
+    pegRatio: 1.0,
+    priceToCashFlow: 52.3,
+    revenueGrowth3Y: 68.5,
+    epsGrowth3Y: 89.2,
+    operatingMargin: 62.3,
+    netMargin: 55.8,
+    debtToEquity: 0.13,
+    freeCashFlow: 61_000_000_000,
+    fcfYield: 1.8,
+  },
+  AMZN: {
+    ticker: "AMZN",
+    name: "Amazon.com Inc.",
+    price: 205.7,
+    marketCap: 2_180_000_000_000,
+    week52High: 242.5,
+    priceToWeek52High: 84.8,
+    peRatio: 38.9,
+    pegRatio: 1.5,
+    priceToCashFlow: 18.5,
+    revenueGrowth3Y: 11.8,
+    epsGrowth3Y: 62.3,
+    operatingMargin: 11.2,
+    netMargin: 8.9,
+    debtToEquity: 0.52,
+    freeCashFlow: 53_000_000_000,
+    fcfYield: 2.4,
+  },
+  META: {
+    ticker: "META",
+    name: "Meta Platforms Inc.",
+    price: 610.2,
+    marketCap: 1_540_000_000_000,
+    week52High: 740.9,
+    priceToWeek52High: 82.4,
+    peRatio: 25.8,
+    pegRatio: 1.1,
+    priceToCashFlow: 17.9,
+    revenueGrowth3Y: 15.6,
+    epsGrowth3Y: 42.1,
+    operatingMargin: 41.5,
+    netMargin: 35.2,
+    debtToEquity: 0.28,
+    freeCashFlow: 52_000_000_000,
+    fcfYield: 3.4,
+  },
+  TSLA: {
+    ticker: "TSLA",
+    name: "Tesla Inc.",
+    price: 276.3,
+    marketCap: 886_000_000_000,
+    week52High: 488.5,
+    priceToWeek52High: 56.6,
+    peRatio: 120.5,
+    pegRatio: 5.8,
+    priceToCashFlow: 68.2,
+    revenueGrowth3Y: 22.1,
+    epsGrowth3Y: -8.5,
+    operatingMargin: 7.5,
+    netMargin: 7.3,
+    debtToEquity: 0.11,
+    freeCashFlow: 3_600_000_000,
+    fcfYield: 0.4,
+  },
+  JPM: {
+    ticker: "JPM",
+    name: "JPMorgan Chase & Co.",
+    price: 268.5,
+    marketCap: 760_000_000_000,
+    week52High: 281.4,
+    priceToWeek52High: 95.4,
+    peRatio: 13.2,
+    pegRatio: 1.8,
+    priceToCashFlow: null,
+    revenueGrowth3Y: 10.5,
+    epsGrowth3Y: 12.8,
+    operatingMargin: null,
+    netMargin: 33.1,
+    debtToEquity: 1.65,
+    freeCashFlow: 18_000_000_000,
+    fcfYield: 2.4,
+  },
+  V: {
+    ticker: "V",
+    name: "Visa Inc.",
+    price: 348.2,
+    marketCap: 680_000_000_000,
+    week52High: 366.5,
+    priceToWeek52High: 95.0,
+    peRatio: 33.8,
+    pegRatio: 2.5,
+    priceToCashFlow: 28.5,
+    revenueGrowth3Y: 10.8,
+    epsGrowth3Y: 15.2,
+    operatingMargin: 67.2,
+    netMargin: 54.8,
+    debtToEquity: 0.58,
+    freeCashFlow: 20_000_000_000,
+    fcfYield: 2.9,
+  },
+  WMT: {
+    ticker: "WMT",
+    name: "Walmart Inc.",
+    price: 96.8,
+    marketCap: 778_000_000_000,
+    week52High: 105.3,
+    priceToWeek52High: 91.9,
+    peRatio: 41.2,
+    pegRatio: 3.8,
+    priceToCashFlow: 18.5,
+    revenueGrowth3Y: 5.8,
+    epsGrowth3Y: 8.2,
+    operatingMargin: 4.3,
+    netMargin: 2.6,
+    debtToEquity: 0.62,
+    freeCashFlow: 12_500_000_000,
+    fcfYield: 1.6,
+  },
+  JNJ: {
+    ticker: "JNJ",
+    name: "Johnson & Johnson",
+    price: 158.9,
+    marketCap: 382_000_000_000,
+    week52High: 167.7,
+    priceToWeek52High: 94.8,
+    peRatio: 15.2,
+    pegRatio: 2.8,
+    priceToCashFlow: 14.5,
+    revenueGrowth3Y: 2.1,
+    epsGrowth3Y: 4.5,
+    operatingMargin: 25.8,
+    netMargin: 18.5,
+    debtToEquity: 0.48,
+    freeCashFlow: 18_200_000_000,
+    fcfYield: 4.8,
+  },
+  UNH: {
+    ticker: "UNH",
+    name: "UnitedHealth Group Inc.",
+    price: 490.2,
+    marketCap: 448_000_000_000,
+    week52High: 630.7,
+    priceToWeek52High: 77.7,
+    peRatio: 17.8,
+    pegRatio: 1.3,
+    priceToCashFlow: 12.8,
+    revenueGrowth3Y: 12.5,
+    epsGrowth3Y: 11.8,
+    operatingMargin: 8.8,
+    netMargin: 5.2,
+    debtToEquity: 0.75,
+    freeCashFlow: 24_000_000_000,
+    fcfYield: 5.4,
+  },
+};
+
+// All searchable entries for demo mode
+const DEMO_SEARCH_ENTRIES: StockSearchResult[] = Object.values(DEMO_STOCKS).map(
+  (s) => ({
+    symbol: s.ticker,
+    name: s.name,
+    currency: "USD",
+    exchangeShortName: "NASDAQ",
+  })
+);
+
+// Fix exchanges for accuracy
+DEMO_SEARCH_ENTRIES.find((e) => e.symbol === "JPM")!.exchangeShortName = "NYSE";
+DEMO_SEARCH_ENTRIES.find((e) => e.symbol === "V")!.exchangeShortName = "NYSE";
+DEMO_SEARCH_ENTRIES.find((e) => e.symbol === "WMT")!.exchangeShortName = "NYSE";
+DEMO_SEARCH_ENTRIES.find((e) => e.symbol === "JNJ")!.exchangeShortName = "NYSE";
+DEMO_SEARCH_ENTRIES.find((e) => e.symbol === "UNH")!.exchangeShortName = "NYSE";
+
+export function demoSearch(query: string): StockSearchResult[] {
+  const q = query.toLowerCase();
+  return DEMO_SEARCH_ENTRIES.filter(
+    (e) =>
+      e.symbol.toLowerCase().includes(q) || e.name.toLowerCase().includes(q)
+  ).slice(0, 8);
+}
+
+export function demoGetStock(ticker: string): StockData | null {
+  return DEMO_STOCKS[ticker.toUpperCase()] || null;
+}
+
+export function isDemoMode(): boolean {
+  return !process.env.FMP_API_KEY || process.env.FMP_API_KEY === "your_key_here";
+}

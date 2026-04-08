@@ -1,4 +1,5 @@
 import { getFullStockData } from "@/lib/fmp-client";
+import { demoGetStock, isDemoMode } from "@/lib/demo-data";
 
 export async function GET(
   _request: Request,
@@ -11,6 +12,17 @@ export async function GET(
   }
 
   try {
+    if (isDemoMode()) {
+      const data = demoGetStock(ticker);
+      if (!data) {
+        return Response.json(
+          { error: `No demo data for ${ticker.toUpperCase()}. Try AAPL, MSFT, GOOGL, NVDA, AMZN, META, TSLA, JPM, V, WMT, JNJ, or UNH.` },
+          { status: 404 }
+        );
+      }
+      return Response.json(data);
+    }
+
     const data = await getFullStockData(ticker);
     return Response.json(data, {
       headers: {

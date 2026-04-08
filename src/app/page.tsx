@@ -96,16 +96,18 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="text-center pb-8 text-xs text-zinc-400">
-        Data from{" "}
-        <a
-          href="https://financialmodelingprep.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline hover:text-zinc-600 transition-colors"
-        >
-          Financial Modeling Prep
-        </a>
+      <footer className="text-center pb-8 px-4 text-xs text-zinc-400 space-y-1">
+        <p>
+          Data from{" "}
+          <a
+            href="https://financialmodelingprep.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-zinc-600 transition-colors"
+          >
+            Financial Modeling Prep
+          </a>
+        </p>
       </footer>
     </div>
   );
