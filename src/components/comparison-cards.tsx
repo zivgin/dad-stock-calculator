@@ -1,7 +1,7 @@
 "use client";
 
 import { METRICS } from "@/lib/constants";
-import { ScoredStock, MetricColor } from "@/lib/types";
+import { HistoricalRatio, ScoredStock, MetricColor, StockProfile } from "@/lib/types";
 import { MetricCell } from "./metric-cell";
 import { ScoreBadge } from "./score-badge";
 import { MetricDetail } from "./metric-detail";
@@ -12,9 +12,11 @@ import { cn } from "@/lib/utils";
 
 interface ComparisonCardsProps {
   stocks: ScoredStock[];
+  historicalRatios?: Record<string, HistoricalRatio[]>;
+  profiles?: Record<string, StockProfile>;
 }
 
-export function ComparisonCards({ stocks }: ComparisonCardsProps) {
+export function ComparisonCards({ stocks, historicalRatios, profiles }: ComparisonCardsProps) {
   const [expandedMetric, setExpandedMetric] = useState<string | null>(null);
 
   if (stocks.length === 0) return null;
@@ -112,6 +114,8 @@ export function ComparisonCards({ stocks }: ComparisonCardsProps) {
                       metric={metric}
                       stocks={stocks}
                       isOpen={true}
+                      historicalRatios={historicalRatios}
+                      profiles={profiles}
                     />
                   )}
                 </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { METRICS } from "@/lib/constants";
-import { ScoredStock } from "@/lib/types";
+import { HistoricalRatio, ScoredStock, StockProfile } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { MetricCell } from "./metric-cell";
 import { MetricDetail } from "./metric-detail";
@@ -16,9 +16,11 @@ import { useState } from "react";
 
 interface ComparisonTableProps {
   stocks: ScoredStock[];
+  historicalRatios?: Record<string, HistoricalRatio[]>;
+  profiles?: Record<string, StockProfile>;
 }
 
-export function ComparisonTable({ stocks }: ComparisonTableProps) {
+export function ComparisonTable({ stocks, historicalRatios, profiles }: ComparisonTableProps) {
   const [expandedMetric, setExpandedMetric] = useState<string | null>(null);
 
   if (stocks.length === 0) return null;
@@ -142,6 +144,8 @@ export function ComparisonTable({ stocks }: ComparisonTableProps) {
                     metric={metric}
                     stocks={stocks}
                     isOpen={isExpanded}
+                    historicalRatios={historicalRatios}
+                    profiles={profiles}
                   />
                 </td>
               </tr>

@@ -4,7 +4,7 @@
  * Swap this file to change data providers.
  */
 
-import { PricePoint, StockData, StockSearchResult } from "./types";
+import { HistoricalRatio, PricePoint, StockData, StockProfile, StockSearchResult } from "./types";
 
 const BASE_URL = "https://financialmodelingprep.com/stable";
 
@@ -231,6 +231,55 @@ export async function getHistoricalPrices(
   return data
     .map((d) => ({ date: d.date, close: d.close }))
     .reverse();
+}
+
+// --- Historical ratios (annual, 5 years) ---
+
+interface FMPAnnualRatio {
+  fiscalYear: string;
+  priceToEarningsRatio: number | null;
+  priceToEarningsGrowthRatio: number | null;
+  priceToOperatingCashFlowRatio: number | null;
+  operatingProfitMargin: number | null;
+  netProfitMargin: number | null;
+  debtToEquityRatio: number | null;
+}
+
+export async function getHistoricalRatios(
+  ticker: string
+): Promise<HistoricalRatio[]> {
+  const data = await fmpFetch<FMPAnnualRatio[]>("/ratios", {
+    symbol: ticker.toUpperCase(),
+    limit: "5",
+  });
+  return data
+    .map((d) => ({
+      year: d.fiscalYear,
+      peRatio: sanitizeNumber(d.priceToEarningsRatio),
+      pegRatio: sanitizeNumber(d.priceToEarningsGrowthRatio),
+      priceToCashFlow: sanitizeNumber(d.priceToOperatingCashFlowRatio),
+      operatingMargin: sanitizeNumber(
+        d.operatingProfitMargin != null ? d.operatingProfitMargin * 100 : null
+      ),
+      netMargin: sanitizeNumber(
+        d.netProfitMargin != null ? d.netProfitMargin * 100 : null
+      ),
+      debtToEquity: sanitizeNumber(d.debtToEquityRatio),
+    }))
+    .reverse(); // oldest first
+}
+
+// --- Stock profile (sector/industry) ---
+
+export async function getStockProfile(ticker: string): Promise<StockProfile> {
+  const data = await fmpFetch<{ sector: string; industry: string }[]>(
+    "/profile",
+    { symbol: ticker.toUpperCase() }
+  );
+  return {
+    sector: data[0]?.sector || "",
+    industry: data[0]?.industry || "",
+  };
 }
 
 /** Converts weird API values (Infinity, -Infinity, NaN) to null */

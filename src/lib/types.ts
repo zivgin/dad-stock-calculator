@@ -31,6 +31,21 @@ export interface PricePoint {
 
 export type TimeRange = "1M" | "3M" | "1Y" | "3Y";
 
+export interface HistoricalRatio {
+  year: string;
+  peRatio: number | null;
+  pegRatio: number | null;
+  priceToCashFlow: number | null;
+  operatingMargin: number | null;
+  netMargin: number | null;
+  debtToEquity: number | null;
+}
+
+export interface StockProfile {
+  sector: string;
+  industry: string;
+}
+
 export type MetricFormat = "currency" | "percent" | "ratio" | "number" | "largeCurrency";
 
 export interface MetricDefinition {

@@ -12,6 +12,7 @@ import { EmptyState } from "@/components/empty-state";
 import { LoadingSkeleton } from "@/components/loading-skeleton";
 import { ErrorMessage } from "@/components/error-message";
 import { useStockData } from "@/hooks/use-stock-data";
+import { useMetricHistory } from "@/hooks/use-metric-history";
 import { scoreStock, rankStocks } from "@/lib/scoring";
 import { MAX_SELECTIONS } from "@/lib/constants";
 
@@ -22,6 +23,7 @@ export default function Home() {
 
   const tickers = useMemo(() => selected.map((s) => s.ticker), [selected]);
   const { stocks, isLoading, error } = useStockData(tickers);
+  const { ratios: historicalRatios, profiles } = useMetricHistory(tickers);
 
   const scoredStocks = useMemo(() => {
     const scored = Object.values(stocks).map(scoreStock);
@@ -96,8 +98,16 @@ export default function Home() {
             <PriceChart tickers={tickers} />
 
             {/* Comparison views */}
-            <ComparisonTable stocks={scoredStocks} />
-            <ComparisonCards stocks={scoredStocks} />
+            <ComparisonTable
+              stocks={scoredStocks}
+              historicalRatios={historicalRatios}
+              profiles={profiles}
+            />
+            <ComparisonCards
+              stocks={scoredStocks}
+              historicalRatios={historicalRatios}
+              profiles={profiles}
+            />
 
             {/* Ranking */}
             <RankingSection stocks={scoredStocks} />
