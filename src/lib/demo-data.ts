@@ -255,5 +255,6 @@ export function demoGetStock(ticker: string): StockData | null {
 }
 
 export function isDemoMode(): boolean {
-  return !process.env.FMP_API_KEY || process.env.FMP_API_KEY === "your_key_here";
+  const key = process.env.NEXT_PUBLIC_FMP_API_KEY || process.env.FMP_API_KEY;
+  return !key || key === "your_key_here";
 }

@@ -9,17 +9,20 @@ import { StockData, StockSearchResult } from "./types";
 const BASE_URL = "https://financialmodelingprep.com/stable";
 
 function apiKey(): string {
-  const key = process.env.FMP_API_KEY;
-  if (!key) throw new Error("FMP_API_KEY environment variable is not set");
+  // NEXT_PUBLIC_ prefix makes this available client-side.
+  // FMP free keys are account-bound and rate-limited, not secret.
+  const key = process.env.NEXT_PUBLIC_FMP_API_KEY || process.env.FMP_API_KEY;
+  if (!key) throw new Error("FMP API key is not configured");
   return key;
 }
 
 async function fmpFetch<T>(path: string, params: Record<string, string> = {}): Promise<T> {
   const searchParams = new URLSearchParams({ ...params, apikey: apiKey() });
   const url = `${BASE_URL}${path}?${searchParams.toString()}`;
-  const res = await fetch(url, { next: { revalidate: 300 } });
+  const res = await fetch(url);
   if (!res.ok) {
-    throw new Error(`FMP API error: ${res.status} ${res.statusText}`);
+    const body = await res.text().catch(() => "");
+    throw new Error(`FMP API error: ${res.status} - ${body}`);
   }
   return res.json();
 }
@@ -69,25 +72,55 @@ interface FMPIncomeStatement {
 export async function searchCompanies(
   query: string
 ): Promise<StockSearchResult[]> {
-  const results = await fmpFetch<FMPSearchResult[]>("/search-name", {
+  const isUSExchange = (r: FMPSearchResult) =>
+    r.exchange === "NASDAQ" ||
+    r.exchange === "NYSE" ||
+    r.exchange === "AMEX" ||
+    r.exchangeFullName?.includes("NASDAQ") ||
+    r.exchangeFullName?.includes("NYSE");
+
+  const toResult = (r: FMPSearchResult): StockSearchResult => ({
+    symbol: r.symbol,
+    name: r.name,
+    currency: r.currency || "USD",
+    exchangeShortName: r.exchange || "NASDAQ",
+  });
+
+  // Search by name
+  const nameResults = await fmpFetch<FMPSearchResult[]>("/search-name", {
     query: query,
   });
-  return results
-    .filter(
-      (r) =>
-        r.exchange === "NASDAQ" ||
-        r.exchange === "NYSE" ||
-        r.exchange === "AMEX" ||
-        r.exchangeFullName?.includes("NASDAQ") ||
-        r.exchangeFullName?.includes("NYSE")
-    )
-    .slice(0, 8)
-    .map((r) => ({
-      symbol: r.symbol,
-      name: r.name,
-      currency: r.currency || "USD",
-      exchangeShortName: r.exchange || "NASDAQ",
-    }));
+  const filtered = nameResults.filter(isUSExchange).slice(0, 8).map(toResult);
+
+  // If query looks like a ticker (1-5 alpha chars), also try a direct profile lookup
+  // to catch exact ticker matches that search-name misses
+  const looksLikeTicker = /^[A-Za-z]{1,5}$/.test(query.trim());
+  if (looksLikeTicker) {
+    const upperQuery = query.trim().toUpperCase();
+    const alreadyIncluded = filtered.some((r) => r.symbol === upperQuery);
+    if (!alreadyIncluded) {
+      try {
+        const profiles = await fmpFetch<FMPProfile[]>("/profile", {
+          symbol: upperQuery,
+        });
+        if (profiles.length > 0) {
+          const p = profiles[0];
+          filtered.unshift({
+            symbol: p.symbol,
+            name: p.companyName,
+            currency: "USD",
+            exchangeShortName: "NASDAQ",
+          });
+          // Keep max 8
+          if (filtered.length > 8) filtered.pop();
+        }
+      } catch {
+        // Profile lookup failed — just use name results
+      }
+    }
+  }
+
+  return filtered;
 }
 
 export async function getFullStockData(ticker: string): Promise<StockData> {

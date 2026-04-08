@@ -1,25 +1,24 @@
 /**
- * Client-side API fetchers used by SWR hooks.
- * These call our Next.js API routes (which proxy to FMP).
+ * Client-side data fetchers.
+ * Calls FMP directly from the browser (free plan blocks cloud IPs).
  */
 
 import { StockData, StockSearchResult } from "./types";
+import { searchCompanies, getFullStockData } from "./fmp-client";
+import { demoSearch, demoGetStock, isDemoMode } from "./demo-data";
 
 export async function fetchSearchResults(
   query: string
 ): Promise<StockSearchResult[]> {
-  const res = await fetch(
-    `/api/stocks/search?q=${encodeURIComponent(query)}`
-  );
-  if (!res.ok) throw new Error("Search failed");
-  return res.json();
+  if (isDemoMode()) return demoSearch(query);
+  return searchCompanies(query);
 }
 
 export async function fetchStockData(ticker: string): Promise<StockData> {
-  const res = await fetch(`/api/stocks/${encodeURIComponent(ticker)}`);
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(body || `Failed to fetch data for ${ticker}`);
+  if (isDemoMode()) {
+    const data = demoGetStock(ticker);
+    if (!data) throw new Error(`No demo data for ${ticker}`);
+    return data;
   }
-  return res.json();
+  return getFullStockData(ticker);
 }
