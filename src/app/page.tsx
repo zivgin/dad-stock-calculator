@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
-import { StockSearch } from "@/components/stock-search";
+import { useState, useCallback, useMemo, useRef } from "react";
+import { StockSearch, StockSearchHandle } from "@/components/stock-search";
 import { SelectedChips } from "@/components/selected-chips";
 import { ComparisonTable } from "@/components/comparison-table";
 import { ComparisonCards } from "@/components/comparison-cards";
@@ -17,6 +17,7 @@ import { scoreStock, rankStocks } from "@/lib/scoring";
 import { MAX_SELECTIONS } from "@/lib/constants";
 
 export default function Home() {
+  const searchRef = useRef<StockSearchHandle>(null);
   const [selected, setSelected] = useState<
     { ticker: string; name: string }[]
   >([]);
@@ -74,6 +75,7 @@ export default function Home() {
       <main className="max-w-5xl mx-auto px-4 pb-12 space-y-6">
         {/* Search */}
         <StockSearch
+          ref={searchRef}
           selectedTickers={tickers}
           onSelect={handleSelect}
         />
@@ -90,7 +92,10 @@ export default function Home() {
         ) : isLoading && !hasData ? (
           <LoadingSkeleton />
         ) : selected.length === 0 ? (
-          <EmptyState onQuickPick={handleSelect} />
+          <EmptyState
+            onQuickPick={handleSelect}
+            onSearchFocus={() => searchRef.current?.focus()}
+          />
         ) : (
           <>
             {isLoading && (
